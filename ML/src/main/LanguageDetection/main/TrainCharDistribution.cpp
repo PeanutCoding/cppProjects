@@ -4,7 +4,7 @@
 #include <vector>
 #include <string.h>
 #include <chrono>
-#include <windows.h>
+
 /*
 This program implements a simple statisticial distribution of a given text.
 The aim is to gather values for detecting a language for a given text.
@@ -16,6 +16,59 @@ std::string subString(std::string target, int start, int length){
         temp += target[i];
     };
     return temp;
+};
+
+int getUTF8Length(std::string s){
+
+    unsigned char c = 0x80;
+    unsigned char d = c >> 1;
+    int counter = 1;
+    std::string checker = "";
+    for(auto x : s){
+        checker += x & c ? "1" : "0";
+        checker += x & d ? "1" : "0";
+        if(checker[0] == '0'){
+            return counter;
+        }
+        else if(checker[0] == '1' && checker[1] == '0'){
+            counter += 1;
+        }
+        else{
+            if(counter > 1){
+                return counter;
+            }
+        }
+        checker = "";
+    }
+    return counter;
+};
+
+std::string getUTF8Str(std::string s){
+    std::string temp = "";
+    unsigned char c = 0x80;
+    unsigned char d = c >> 1;
+    int counter = 1;
+    std::string checker = "";
+    for(auto x : s){
+        temp += x;
+        checker += x & c ? "1" : "0";
+        checker += x & d ? "1" : "0";
+        if(checker[0] == '0'){
+            return temp;
+        }
+        else if(checker[0] == '1' && checker[1] == '0'){
+            counter += 1;
+            continue;
+        }
+        else{
+            if(counter > 1){
+                return temp;
+            }
+        }
+        checker = "";
+    }
+    return temp;
+
 };
 
 long int sumCounts(std::unordered_map<std::string, long int> m){
@@ -160,7 +213,7 @@ int main(int argc, char **argv){
     std::cout << mystring.length();
     myfile.close();
     std::cout << mystring.length();
-    */
+    
     
     for(int i = 1; i > 0; i--){
         nGramCount = count(nGramCount, i, "./../res/Language-Samples/german.txt");
@@ -169,13 +222,56 @@ int main(int argc, char **argv){
     
     std::cout << "Zählen erfolgreich \n";
     writeToFile("./../res/test.txt", nGramCount);
-    
-    /*
-    //k = sumCounts(nGramCount);
-    N1 = nGramCounts(nGramCount, 1);
-    N2 = nGramCounts(nGramCount, 2);
-    backOff = N1 / (N1 + 2*N2);
-    std::cout << backOff << "\n";
     */
+    /*
+    
+    string temp = ""; 
+    string temp2 = "";
+    string start = "";
+    string s = "fhwoxkrjeoelnddbdhowofhwoxk)aä@âáàåã&-$%śccxvttøœrjeoelnddbdà";
+    for(int i = 0; i < s.length(); i++){
+      
+      temp = "";
+      for(unsigned char c = 0x80; c; c >>=1){
+        temp += (s[i] & c ? "1" : "0");
+      }
+    
+      if(temp[0] == '0'){
+        if(temp2.length() > 0){
+          cout << start << ": " << temp2 << "\n";
+          temp2 = "";
+          start = "";
+        }
+        start = s[i];
+        cout << start << ": " << temp << "\n";
+        temp = "";
+        start = "";
+        temp2 = "";
+      }
+      
+      else if(temp[0] == '1' && temp[1] == '1'){
+        if(temp2.length() > 0){
+          cout << start << ": " << temp2 << "\n";
+          temp2 = "";
+          start = "";
+        }
+        start += s[i];
+        temp2 += temp + " ";
+      }
+      else{
+      
+        temp2 += temp + " ";
+        start += s[i];
+        if(i == s.length() - 1){
+          //cout << i << " " << s.length() << "\n";
+          cout << start << ": " << temp2 << "\n";
+        }
+      }
+    }
+    */
+    std::cout << getUTF8Length("ä") << "\n";
+    std::cout << getUTF8Str("*") << "\n\n";
+    std::cout << getUTF8Length("𒀁") << "\n";
+    std::cout << getUTF8Str("𒀁") << "\n";
     return 0;
 }
